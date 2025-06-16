@@ -18,6 +18,7 @@
                     <input type="text" class="form-control" id="nomeDeputado" required autofocus>
                     <output id="mensagem" class="form-text"></output>
                 </div>
+
                 <div class="col-md-2 mt-2 d-flex align-items-center justify-content-center">
                     <button type="submit" class="btn btn-primary w-100">Consultar</button>
                 </div>
@@ -41,32 +42,37 @@
         const uf = document.getElementById('uf')
         const mensagem = document.getElementById('mensagem');
 
-        form.addEventListener('submit', function (event) {
+        form.addEventListener('submit', event => {
             event.preventDefault(); // impede o envio automático do formulário
-            const nome = input.value.trim();
+            const nome = input.value.trim(); // remove espaços em branco no inicio e fim da string
 
-            mensagem.textContent = 'Buscando...';
+            mensagem.textContent = 'Buscando...'; // mensagem que aparece quando o botão for pressionado (output)
 
-            fetch(`https://dadosabertos.camara.leg.br/api/v2/deputados?nome=${encodeURIComponent(nome)}&ordem=ASC&ordenarPor=nome`)
-            .then(resposta => resposta.json()) // parse para JSON
-            .then(resultado => {
-                const deputado = resultado.dados[0];;
-                if (deputado) {
-                    imagem.src = deputado.urlFoto;
-                    dados.textContent = deputado.nome;
-                    partido.textContent = deputado.siglaPartido
-                    uf.textContent = deputado.siglaUf;
-                    mensagem.textContent = '';
-                } else {
-                    imagem.src = '';
-                    dados.textContent = 'Nenhum deputado encontrado com esse nome.';
-                    mensagem.textContent = '';
-                }
-            })
-            .catch(erro => {
-                console.error('Erro ao buscar dados:', erro);
-                mensagem.textContent = 'Erro ao buscar dados.';
+            const requisicao = new Request(`https://dadosabertos.camara.leg.br/api/v2/deputados?nome=${encodeURIComponent(nome)}&ordem=ASC&ordenarPor=nome`, {
+                method: 'GET'
             });
+
+            fetch(requisicao)
+                .then(resposta => resposta.json()) // parse para JSON
+                .then(resultado => {
+                    const deputado = resultado.dados[0];;
+                    if (deputado) {
+                        imagem.src = deputado.urlFoto;
+                        dados.textContent = deputado.nome;
+                        partido.textContent = deputado.siglaPartido
+                        uf.textContent = deputado.siglaUf;
+                        mensagem.textContent = '';
+                    } else {
+                        imagem.src = '';
+                        dados.textContent = 'Nenhum deputado encontrado com esse nome.';
+                        mensagem.textContent = '';
+                    }
+                })
+                .catch(erro => {
+                    console.error('Erro ao buscar dados:', erro);
+                    mensagem.textContent = 'Erro ao buscar dados.';
+                }
+            );
         });
     </script>
 </body>
